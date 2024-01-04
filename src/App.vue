@@ -5,12 +5,16 @@ import PointScorer from "./components/PointScorer.vue";
 
 <template>
   <Header />
-  <PointScorer playerName="Jugador 1" />
-  <PointScorer playerName="Jugador 2" />
+  <div class="flex justify-center gap-x-20 self-center">
+    <PointScorer playerName="Jugador 1" />
+    <PointScorer playerName="Jugador 2" />
+  </div>
 </template>
 
 <style>
 #app {
+  display: grid;
+  grid-template-rows: auto 1fr;
   background-color: #064e3b;
   min-height: 100vh;
   min-height: 100svh;

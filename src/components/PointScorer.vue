@@ -17,7 +17,7 @@ const decrementScore = () => {
 
 <template>
   <div
-    class="flex max-w-[480px] flex-col items-center gap-y-8 border-4 border-emerald-700 bg-emerald-800 px-8 py-10 text-white"
+    class="flex w-full max-w-[480px] flex-col items-center gap-y-8 border-4 border-emerald-700 bg-emerald-800 px-8 py-10 text-white"
   >
     <h2 class="text-4xl font-medium">{{ playerName }}</h2>
 
