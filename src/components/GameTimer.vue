@@ -5,19 +5,19 @@
       class="rounded-lg border-2 border-emerald-400 bg-emerald-600 px-6 py-3 text-xl font-medium transition hover:border-emerald-500 hover:bg-emerald-700"
       @click="startGame"
     >
-      Start
+      Inicio
     </button>
 
     <div v-if="gameStarted">
       <p class="font-medium">Hora de inicio:</p>
-      <p class="font-medium">{{ startTime }}</p>
+      <p class="font-medium">{{ formattedStartTime }}</p>
     </div>
 
-    <h2 class="text-2xl font-bold">Tiempo / Minuto</h2>
+    <h2 v-if="!gameStarted" class="text-2xl font-bold">Tiempo / Minuto</h2>
 
     <div>
       <h3 class="text-xl font-bold">Tiempo promoción</h3>
-      <p class="text-sm">Hasta las 2:00 PM</p>
+      <p class="text-sm">Hasta las {{ formattedPromotionHour }}</p>
       <p class="text-sm">minuto a ${{ promotionFare }}</p>
       <p v-if="gameStarted" class="text-base">
         {{ promotionMinutes }} minutos = ${{ promotionValue }}
@@ -26,7 +26,7 @@
 
     <div>
       <h3 class="text-xl font-bold">Tiempo normal</h3>
-      <p class="text-sm">Después de las 2:00 PM</p>
+      <p class="text-sm">Después de las {{ formattedPromotionHour }}</p>
       <p class="text-sm">minuto a ${{ normalFare }}</p>
       <p v-if="gameStarted" class="text-base">
         {{ normalMinutes }} minutos = ${{ normalValue }}
@@ -35,7 +35,7 @@
 
     <div v-if="gameStarted">
       <h2 class="text-2xl font-bold">Cuenta</h2>
-      <p>{{ totalMinutes }} = ${{ totalPayment }}</p>
+      <p>{{ totalMinutes }} minutos = ${{ totalPayment }}</p>
     </div>
 
     <button
@@ -54,28 +54,56 @@ export default {
   data() {
     return {
       gameStarted: false,
+      promoHourStart: 1,
+      promoMinutesStart: 20,
+      promoTime: null,
+      formattedPromotionHour: null,
       startTime: null,
+      formattedStartTime: null,
       promotionFare: 80, // Change these values as needed
       normalFare: 110, // Example values; adjust as required
       promotionMinutes: 0,
       normalMinutes: 0,
-      // Add other variables needed for calculations
+      promotionValue: 0,
+      normalValue: 0,
+      totalMinutes: 0,
+      totalPayment: 0,
     };
   },
+  mounted() {
+    this.formatPromotionHour();
+  },
   methods: {
+    formatPromotionHour() {
+      const promoHour = new Date();
+
+      promoHour.setHours(this.promoHourStart);
+      promoHour.setMinutes(this.promoMinutesStart);
+      this.promoTime = promoHour;
+
+      const hours = promoHour.getHours();
+      const minutes = promoHour.getMinutes();
+      const formattedHours = hours % 12 || 12;
+      const formattedMinutes = this.padZero(minutes);
+      const ampm = hours >= 12 ? "PM" : "AM";
+
+      this.formattedPromotionHour = `${formattedHours}:${formattedMinutes} ${ampm}`;
+    },
     startGame() {
-      this.gameStarted = true;
       const now = new Date();
+
+      this.gameStarted = true;
+      this.startTime = now;
+
       const hours = now.getHours();
       const minutes = now.getMinutes();
       const seconds = now.getSeconds();
       const ampm = hours >= 12 ? "PM" : "AM";
-
       const formattedHours = hours % 12 || 12;
       const formattedMinutes = this.padZero(minutes);
       const formattedSeconds = this.padZero(seconds);
 
-      this.startTime = `${formattedHours}:${formattedMinutes}:${formattedSeconds} ${ampm}`;
+      this.formattedStartTime = `${formattedHours}:${formattedMinutes}:${formattedSeconds} ${ampm}`;
 
       // Start a timer to update elapsed time and minutes
       this.timer = setInterval(() => {
@@ -88,18 +116,21 @@ export default {
     updateTimeAndMinutes() {
       if (this.startTime) {
         const now = new Date();
-        const timeDiff = Math.floor((now - new Date(this.startTime)) / 1000); // Difference in seconds
+        const differenceInMillis = now.getTime() - this.startTime.getTime();
+        const differenceInMinutes = Math.round(
+          differenceInMillis / (1000 * 60),
+        );
 
-        const elapsedMinutes = Math.floor(timeDiff / 60); // Calculate elapsed minutes
-        const elapsedSeconds = timeDiff % 60; // Calculate remaining seconds after minutes
-
-        if (now.getHours() < 14) {
-          this.promotionMinutes = elapsedMinutes; // Promotion minutes
-          this.normalMinutes = 0; // Reset normal minutes when still in promotion time
+        if (now.getTime() <= this.promoTime.getTime()) {
+          this.promotionMinutes = differenceInMinutes;
+          this.promotionValue = this.promotionMinutes * this.promotionFare;
         } else {
-          this.promotionMinutes = 0; // Reset promotion minutes after promotion time ends
-          this.normalMinutes = elapsedMinutes; // Normal minutes after 2 o'clock
+          this.normalMinutes = differenceInMinutes;
+          this.normalValue = this.normalMinutes * this.normalFare;
         }
+
+        this.totalMinutes = this.promotionMinutes + this.normalMinutes;
+        this.totalPayment = this.promotionValue + this.normalValue;
       }
     },
   },
