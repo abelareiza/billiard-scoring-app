@@ -1,12 +1,14 @@
 <script setup>
-import Header from "./components/Header.vue";
+import Header from "./components/header.vue";
 import PointScorer from "./components/PointScorer.vue";
+import GameTimer from "./components/GameTimer.vue";
 </script>
 
 <template>
   <Header />
-  <div class="flex justify-center gap-x-20 self-center">
+  <div class="flex items-center justify-center gap-x-20 self-center">
     <PointScorer playerName="Jugador 1" />
+    <GameTimer />
     <PointScorer playerName="Jugador 2" />
   </div>
 </template>
