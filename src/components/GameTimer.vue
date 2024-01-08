@@ -55,7 +55,7 @@ export default {
     return {
       gameStarted: false,
       promoHourStart: 1,
-      promoMinutesStart: 20,
+      promoMinutesStart: 32,
       promoTime: null,
       formattedPromotionHour: null,
       startTime: null,
@@ -65,7 +65,7 @@ export default {
       promotionMinutes: 0,
       normalMinutes: 0,
       promotionValue: 0,
-      normalValue: 0,
+      normalValue: 0, 
       totalMinutes: 0,
       totalPayment: 0,
     };
@@ -125,7 +125,7 @@ export default {
           this.promotionMinutes = differenceInMinutes;
           this.promotionValue = this.promotionMinutes * this.promotionFare;
         } else {
-          this.normalMinutes = differenceInMinutes;
+          this.normalMinutes = differenceInMinutes - this.promotionMinutes;
           this.normalValue = this.normalMinutes * this.normalFare;
         }
 
