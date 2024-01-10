@@ -1,7 +1,7 @@
 <template>
   <div>
     <button
-      class="rounded-lg border-2 border-gray-400 bg-gray-500 px-4 py-2 text-lg font-medium text-white"
+      class="rounded-lg border-2 border-gray-500 bg-gray-600 px-6 py-1 text-lg text-white"
       @click="openModal"
     >
       Tarifas
@@ -12,18 +12,18 @@
       v-if="showModal"
       class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
     >
-      <div class="w-1/2 rounded-lg bg-white p-6">
+      <div class="w-1/2 rounded-lg bg-zinc-100 p-8">
         <span
           @click="closeModal"
-          class="absolute right-0 top-0 cursor-pointer p-4 text-xl"
+          class="absolute right-0 top-0 flex h-12 w-12 cursor-pointer items-center justify-center rounded-full bg-red-600 text-2xl font-bold leading-none text-gray-800"
           >&times;</span
         >
         <!-- Modal content -->
         <div class="modal-content">
           <!-- Your modal content goes here -->
 
-          <header class="mb-6 flex items-center justify-between">
-            <h1 class="text-2xl font-bold">Tarifas</h1>
+          <header class="flex items-center justify-between">
+            <h2 class="text-2xl font-bold">Tarifas</h2>
             <!-- Promotion toggle -->
             <label class="relative inline-flex cursor-pointer items-center">
               <input
@@ -42,15 +42,64 @@
             </label>
           </header>
 
-          <ul v-if="getPromotion.active">
+          <!-- Promotion time picker -->
+          <div
+            v-if="getPromotion.active"
+            class="flex flex-col items-center pt-8"
+          >
+            <h2 class="mb-2 text-center text-lg font-medium">
+              Horario promoción:
+            </h2>
+            <div class="w-40 rounded-lg bg-white p-5 shadow-lg">
+              <div class="flex">
+                <select
+                  ref="hours"
+                  name="hours"
+                  class="appearance-none bg-transparent text-xl outline-none"
+                  :value="formatHour(promoStartHour.hour)"
+                  @change="updatePromoStartHour"
+                >
+                  <option v-for="index in 12" :key="index" :value="index">
+                    {{ index }}
+                  </option>
+                </select>
+                <span class="mr-3 text-xl">:</span>
+                <select
+                  ref="minutes"
+                  name="minutes"
+                  class="mr-4 appearance-none bg-transparent text-xl outline-none"
+                  v-model="promoStartHour.minutes"
+                  @change="updatePromoStartHour"
+                >
+                  <option value="0">00</option>
+                  <option value="30">30</option>
+                </select>
+                <select
+                  ref="ampm"
+                  name="ampm"
+                  class="appearance-none bg-transparent text-xl outline-none"
+                  @change="updatePromoStartHour"
+                >
+                  <option value="am" :selected="promoStartHour.hour < 12">
+                    AM
+                  </option>
+                  <option value="pm" :selected="promoStartHour.hour >= 12">
+                    PM
+                  </option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <ul v-if="getPromotion.active" class="grid grid-cols-2 gap-8 py-8">
             <li
               v-for="fare in fares"
               :key="fare.id"
-              class="mb-4 flex flex-col gap-y-2"
+              class="mb-4 flex flex-col gap-y-2 text-lg font-medium"
             >
               {{ fare.title }}: ${{ fare.fare }}
               <input
-                class="w-40 rounded-lg border border-gray-800 px-2 py-1"
+                class="rounded-md bg-white px-4 py-2 shadow-lg"
                 type="number"
                 v-model="editedFares[fare.id]"
                 @change="updateFare(fare.id)"
@@ -58,17 +107,24 @@
             </li>
           </ul>
 
-          <ul v-if="!getPromotion.active">
-            <li class="mb-4 flex flex-col gap-y-2">
+          <ul v-if="!getPromotion.active" class="grid grid-cols-2 gap-8 py-8">
+            <li class="mb-4 flex flex-col gap-y-2 text-lg font-medium">
               {{ getAllFares[1].title }}: ${{ getAllFares[1].fare }}
               <input
-                class="w-40 rounded-lg border border-gray-800 px-2 py-1"
+                class="rounded-md bg-white px-4 py-2 shadow-lg"
                 type="number"
                 v-model="editedFares[getAllFares[1].id]"
                 @change="updateFare(getAllFares[1].id)"
               />
             </li>
           </ul>
+
+          <button
+            class="hover:red-emerald-700 mx-auto block rounded-lg border-2 border-blue-500 bg-blue-600 px-6 py-1 text-lg text-white transition hover:bg-blue-700"
+            @click="closeModal"
+          >
+            Listo
+          </button>
         </div>
       </div>
     </div>
@@ -87,13 +143,21 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(["getAllFares", "getPromotion"]), // Assuming 'fares' is the module name
+    ...mapGetters(["getAllFares", "getPromotion", "getPromoStartHour"]),
     fares() {
       return this.getAllFares; // Accessing the getter
     },
+    promoStartHour: {
+      get() {
+        return this.getPromoStartHour;
+      },
+      set(value) {
+        this.setPromoStartHour(value);
+      },
+    },
   },
   methods: {
-    ...mapMutations(["setFares", "setPromotion"]),
+    ...mapMutations(["setFares", "setPromotion", "setPromoStartHour"]),
     openModal() {
       this.showModal = true;
       // Create a copy of fares to edit temporarily
@@ -116,6 +180,25 @@ export default {
     togglePromotion() {
       const newActiveState = !this.getPromotion.active;
       this.setPromotion({ active: newActiveState });
+    },
+    updatePromoStartHour() {
+      const hours = parseInt(this.$refs.hours.value);
+      const minutes = parseInt(this.$refs.minutes.value);
+      const amPm = this.$refs.ampm.value;
+
+      // If PM is selected, add 12 to the hours (except for 12 PM)
+      let newHour = amPm === "pm" && hours !== 12 ? hours + 12 : hours;
+
+      // Handle special case: 12 AM (midnight)
+      if (amPm === "am" && hours === 12) {
+        newHour = 0;
+      }
+
+      this.setPromoStartHour({ hour: newHour, minutes });
+    },
+    formatHour(hour) {
+      // Helper method to format the displayed hour
+      return hour > 12 ? hour % 12 || 12 : hour;
     },
   },
 };

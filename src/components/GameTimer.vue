@@ -84,20 +84,24 @@ export default {
       totalPayment: 0,
     };
   },
-  mounted() {
-    this.formatPromotionHour();
-  },
   computed: {
     ...mapGetters(["getAllFares", "getPromotion", "getPromoStartHour"]),
+    promoStartHour() {
+      return this.getPromoStartHour;
+    },
+  },
+  watch: {
+    promoStartHour: {
+      handler: "formatPromotionHour",
+      immediate: true, // Call the handler immediately on component mount
+    },
   },
   methods: {
     formatPromotionHour() {
       const promoHour = new Date();
-
       promoHour.setHours(this.getPromoStartHour.hour);
       promoHour.setMinutes(this.getPromoStartHour.minutes);
       this.promoTime = promoHour;
-
       const hours = promoHour.getHours();
       const minutes = promoHour.getMinutes();
       const formattedHours = hours % 12 || 12;
