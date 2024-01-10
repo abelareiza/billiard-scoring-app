@@ -6,7 +6,7 @@ import GameTimer from "./components/GameTimer.vue";
 
 <template>
   <Header />
-  <div class="flex items-center justify-center gap-x-20 self-center">
+  <div class="flex items-center justify-center gap-x-10 self-center">
     <PointScorer playerName="Jugador 1" />
     <GameTimer />
     <PointScorer playerName="Jugador 2" />

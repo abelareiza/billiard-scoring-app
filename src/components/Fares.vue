@@ -21,10 +21,22 @@
         <!-- Modal content -->
         <div class="modal-content">
           <!-- Your modal content goes here -->
-          <h1 class="mb-3 text-2xl font-bold">Tarifas</h1>
+
+          <h1 class="mb-6 text-2xl font-bold">Tarifas</h1>
+
           <ul>
-            <li v-for="fare in fares" :key="fare.id">
+            <li
+              v-for="fare in fares"
+              :key="fare.id"
+              class="mb-4 flex flex-col gap-y-2"
+            >
               {{ fare.title }}: ${{ fare.fare }}
+              <input
+                class="w-40 rounded-lg border border-gray-800 px-2 py-1"
+                type="number"
+                v-model="editedFares[fare.id]"
+                @change="updateFare(fare.id)"
+              />
             </li>
           </ul>
         </div>
@@ -34,27 +46,42 @@
 </template>
 
 <script>
-import { mapGetters } from "vuex";
+import { mapGetters, mapMutations } from "vuex";
 
 export default {
   name: "Fares",
   data() {
     return {
       showModal: false,
+      editedFares: {}, // Store edited values temporarily
     };
   },
   computed: {
-    ...mapGetters(["getAllFares"]), // Assuming 'fares' is the module name
+    ...mapGetters(["getAllFares", "getPromotion"]), // Assuming 'fares' is the module name
     fares() {
       return this.getAllFares; // Accessing the getter
     },
   },
   methods: {
+    ...mapMutations(["setFares", "setPromotion"]),
     openModal() {
       this.showModal = true;
+      // Create a copy of fares to edit temporarily
+      this.editedFares = JSON.parse(JSON.stringify(this.getAllFares));
     },
     closeModal() {
       this.showModal = false;
+      this.editedFares = {}; // Reset edited values on modal close
+    },
+    updateFare(fareId) {
+      const updatedFare = this.editedFares.find((fare) => fare.id === fareId);
+      const newFares = this.getAllFares.map((fare) => {
+        if (fare.id === fareId) {
+          return { ...fare, fare: this.editedFares[fareId] };
+        }
+        return fare;
+      });
+      this.setFares(newFares); // Update Vuex store with new fares
     },
   },
 };

@@ -12,7 +12,7 @@ const state = {
     },
   ],
   promotion: {
-    active: false,
+    active: true,
   },
   promoStartHour: {
     hour: 11,
@@ -30,7 +30,7 @@ const actions = {};
 
 const mutations = {
   setFares: (state, fares) => (state.fares = fares),
-  setPromotion: (state, fares) => (state.fares = fares),
+  setPromotion: (state, fares) => (state.fares = fares),  
   setPromoStartHour: (state, fares) => (state.fares = fares),
 };
 
