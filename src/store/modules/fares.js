@@ -1,12 +1,12 @@
 const state = {
   fares: [
     {
-      id: 1,
+      id: 0,
       title: "Tarifa promocion",
       fare: 80,
     },
     {
-      id: 2,
+      id: 1,
       title: "Tarifa normal",
       fare: 110,
     },
@@ -30,8 +30,8 @@ const actions = {};
 
 const mutations = {
   setFares: (state, fares) => (state.fares = fares),
-  setPromotion: (state, fares) => (state.fares = fares),  
-  setPromoStartHour: (state, fares) => (state.fares = fares),
+  setPromotion: (state, promotion) => (state.promotion = promotion),
+  setPromoStartHour: (state, promoStartHour) => (state.promoStartHour = promoStartHour),
 };
 
 export default {

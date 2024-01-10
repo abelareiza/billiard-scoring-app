@@ -22,9 +22,27 @@
         <div class="modal-content">
           <!-- Your modal content goes here -->
 
-          <h1 class="mb-6 text-2xl font-bold">Tarifas</h1>
+          <header class="mb-6 flex items-center justify-between">
+            <h1 class="text-2xl font-bold">Tarifas</h1>
+            <!-- Promotion toggle -->
+            <label class="relative inline-flex cursor-pointer items-center">
+              <input
+                type="checkbox"
+                value=""
+                class="peer sr-only"
+                :checked="getPromotion.active"
+                @change="togglePromotion"
+              />
+              <div
+                class="peer h-6 w-11 rounded-full bg-gray-200 after:absolute after:start-[2px] after:top-0.5 after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-blue-600 peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:ring-4 peer-focus:ring-blue-300 rtl:peer-checked:after:-translate-x-full"
+              ></div>
+              <span class="font-regular ms-2 text-base text-gray-800"
+                >Activar promoción</span
+              >
+            </label>
+          </header>
 
-          <ul>
+          <ul v-if="getPromotion.active">
             <li
               v-for="fare in fares"
               :key="fare.id"
@@ -36,6 +54,18 @@
                 type="number"
                 v-model="editedFares[fare.id]"
                 @change="updateFare(fare.id)"
+              />
+            </li>
+          </ul>
+
+          <ul v-if="!getPromotion.active">
+            <li class="mb-4 flex flex-col gap-y-2">
+              {{ getAllFares[1].title }}: ${{ getAllFares[1].fare }}
+              <input
+                class="w-40 rounded-lg border border-gray-800 px-2 py-1"
+                type="number"
+                v-model="editedFares[getAllFares[1].id]"
+                @change="updateFare(getAllFares[1].id)"
               />
             </li>
           </ul>
@@ -82,6 +112,10 @@ export default {
         return fare;
       });
       this.setFares(newFares); // Update Vuex store with new fares
+    },
+    togglePromotion() {
+      const newActiveState = !this.getPromotion.active;
+      this.setPromotion({ active: newActiveState });
     },
   },
 };
