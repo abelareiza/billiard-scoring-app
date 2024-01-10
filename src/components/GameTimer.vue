@@ -15,13 +15,13 @@
 
     <h2 v-if="!gameStarted" class="text-2xl font-bold">Tiempo / Minuto</h2>
 
-    <div>
+    <div v-if="getPromotion.active">
       <h3 class="text-xl font-bold">Tiempo promoción</h3>
       <p class="text-sm">Hasta las {{ formattedPromotionHour }}</p>
       <p class="text-sm">
-        minuto a
+        Minuto a
         <span class="text-base font-bold text-emerald-400"
-          >${{ promotionFare }}</span
+          >${{ getAllFares[0].fare }}</span
         >
       </p>
       <p v-if="gameStarted" class="text-base">
@@ -31,11 +31,13 @@
 
     <div>
       <h3 class="text-xl font-bold">Tiempo normal</h3>
-      <p class="text-sm">Después de las {{ formattedPromotionHour }}</p>
+      <p v-if="getPromotion.active" class="text-sm">
+        Después de las {{ formattedPromotionHour }}
+      </p>
       <p class="text-sm">
-        minuto a
+        Minuto a
         <span class="text-base font-bold text-emerald-400"
-          >${{ normalFare }}</span
+          >${{ getAllFares[1].fare }}</span
         >
       </p>
       <p v-if="gameStarted" class="text-base">
@@ -45,7 +47,12 @@
 
     <div v-if="gameStarted">
       <h2 class="text-2xl font-bold">Cuenta</h2>
-      <p>{{ totalMinutes }} minutos = ${{ totalPayment }}</p>
+      <p>
+        {{ totalMinutes }} minutos =
+        <span class="text-base font-bold text-emerald-400"
+          >${{ totalPayment }}</span
+        >
+      </p>
     </div>
 
     <button
@@ -59,19 +66,16 @@
 </template>
 
 <script>
+import { mapGetters } from "vuex";
 export default {
   name: "GameTimer",
   data() {
     return {
       gameStarted: false,
-      promoHourStart: 1,
-      promoMinutesStart: 32,
       promoTime: null,
       formattedPromotionHour: null,
       startTime: null,
       formattedStartTime: null,
-      promotionFare: 80, // Change these values as needed
-      normalFare: 110, // Example values; adjust as required
       promotionMinutes: 0,
       normalMinutes: 0,
       promotionValue: 0,
@@ -83,12 +87,15 @@ export default {
   mounted() {
     this.formatPromotionHour();
   },
+  computed: {
+    ...mapGetters(["getAllFares", "getPromotion", "getPromoStartHour"]),
+  },
   methods: {
     formatPromotionHour() {
       const promoHour = new Date();
 
-      promoHour.setHours(this.promoHourStart);
-      promoHour.setMinutes(this.promoMinutesStart);
+      promoHour.setHours(this.getPromoStartHour.hour);
+      promoHour.setMinutes(this.getPromoStartHour.minutes);
       this.promoTime = promoHour;
 
       const hours = promoHour.getHours();
@@ -131,12 +138,18 @@ export default {
           differenceInMillis / (1000 * 60),
         );
 
-        if (now.getTime() <= this.promoTime.getTime()) {
-          this.promotionMinutes = differenceInMinutes;
-          this.promotionValue = this.promotionMinutes * this.promotionFare;
+        if (this.getPromotion.active) {
+          if (now.getTime() <= this.promoTime.getTime()) {
+            this.promotionMinutes = differenceInMinutes;
+            this.promotionValue =
+              this.promotionMinutes * this.getAllFares[0].fare;
+          } else {
+            this.normalMinutes = differenceInMinutes - this.promotionMinutes;
+            this.normalValue = this.normalMinutes * this.getAllFares[1].fare;
+          }
         } else {
-          this.normalMinutes = differenceInMinutes - this.promotionMinutes;
-          this.normalValue = this.normalMinutes * this.normalFare;
+          this.normalMinutes = differenceInMinutes;
+          this.normalValue = this.normalMinutes * this.getAllFares[1].fare;
         }
 
         this.totalMinutes = this.promotionMinutes + this.normalMinutes;

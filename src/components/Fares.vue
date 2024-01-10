@@ -21,7 +21,12 @@
         <!-- Modal content -->
         <div class="modal-content">
           <!-- Your modal content goes here -->
-          <p>This is your modal content!</p>
+          <h1 class="mb-3 text-2xl font-bold">Tarifas</h1>
+          <ul>
+            <li v-for="fare in fares" :key="fare.id">
+              {{ fare.title }}: ${{ fare.fare }}
+            </li>
+          </ul>
         </div>
       </div>
     </div>
@@ -29,11 +34,20 @@
 </template>
 
 <script>
+import { mapGetters } from "vuex";
+
 export default {
+  name: "Fares",
   data() {
     return {
       showModal: false,
     };
+  },
+  computed: {
+    ...mapGetters(["getAllFares"]), // Assuming 'fares' is the module name
+    fares() {
+      return this.getAllFares; // Accessing the getter
+    },
   },
   methods: {
     openModal() {
