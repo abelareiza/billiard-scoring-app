@@ -1,5 +1,5 @@
 <script setup>
-import Header from "./components/header.vue";
+import Header from "./components/Header.vue";
 import PointScorer from "./components/PointScorer.vue";
 import GameTimer from "./components/GameTimer.vue";
 </script>

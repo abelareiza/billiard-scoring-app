@@ -18,7 +18,12 @@
     <div>
       <h3 class="text-xl font-bold">Tiempo promoción</h3>
       <p class="text-sm">Hasta las {{ formattedPromotionHour }}</p>
-      <p class="text-sm">minuto a ${{ promotionFare }}</p>
+      <p class="text-sm">
+        minuto a
+        <span class="text-base font-bold text-emerald-400"
+          >${{ promotionFare }}</span
+        >
+      </p>
       <p v-if="gameStarted" class="text-base">
         {{ promotionMinutes }} minutos = ${{ promotionValue }}
       </p>
@@ -27,7 +32,12 @@
     <div>
       <h3 class="text-xl font-bold">Tiempo normal</h3>
       <p class="text-sm">Después de las {{ formattedPromotionHour }}</p>
-      <p class="text-sm">minuto a ${{ normalFare }}</p>
+      <p class="text-sm">
+        minuto a
+        <span class="text-base font-bold text-emerald-400"
+          >${{ normalFare }}</span
+        >
+      </p>
       <p v-if="gameStarted" class="text-base">
         {{ normalMinutes }} minutos = ${{ normalValue }}
       </p>
@@ -65,7 +75,7 @@ export default {
       promotionMinutes: 0,
       normalMinutes: 0,
       promotionValue: 0,
-      normalValue: 0, 
+      normalValue: 0,
       totalMinutes: 0,
       totalPayment: 0,
     };
